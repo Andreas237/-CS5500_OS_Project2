@@ -1,0 +1,21 @@
+CC=gcc
+CFLAGS=-pthread -Wall
+OUT=project2_exec
+DEPS=task1.h task2.h task3.h
+OBJ=main.o
+
+
+$(OBJ): main.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(OUT): $(OBJ)
+	   $(CC) -o $@ $^ $(CFLAGS)
+
+
+
+
+
+.PHONY: clean
+
+clean:
+	rm $(OUT) $(OBJ)
