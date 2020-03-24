@@ -9,8 +9,9 @@
 
 
 // Global vars
+typedef int semaphore;
+semaphore BUFF_TRACKER = 0; // Number of items in the buffer
 char BUFF[BUFF_SIZE];       // six character buffer required by the project spec
-pthread_mutex_t BUFF_TRACKER[BUFF_SIZE];       // six character buffer required by the project spec
 char fname[] = "project-2_code/message.txt";
 FILE *fp;           // pointer for file
 int CONTINUE = 1;
@@ -112,6 +113,7 @@ void task2(){
 
 
     //TODO: How to thread these?  attributes?
+    //TODO: Lec7 discusses semaphores and mutexes; Lec8 pthread
     /*
     printf("In task2: creating threads PRODCUER\n");
     rc = pthread_create(&threads[t], NULL, producer, (void *));
