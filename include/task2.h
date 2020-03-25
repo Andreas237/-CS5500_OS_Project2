@@ -26,7 +26,7 @@ FILE *fp;           // pointer for file
 void consumer(void){
     char * consumer_ptr = BUFF;
     int index = 0;
-    printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
+    //printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
 
     //  CONTINUE indicates that characters are still being read from *fp.
     //  Read characters until producer() signals with CONTINUE that the file is
@@ -46,7 +46,7 @@ void consumer(void){
 
         }// end if( consumer_ptr[index] != (char *)0)
         else {
-            printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
+            //printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
         }
 
     }while( !feof(fp) );
@@ -79,7 +79,7 @@ void producer(void){
 
             if( pthread_mutex_trylock(&mutex_buff) ){
                 producer_ptr[index] = getc(fp);;
-                printf("PRODUCER: Placing %c in BUFF[%d]\n",producer_ptr[index],index);
+                //printf("PRODUCER: Placing %c in BUFF[%d]\n",producer_ptr[index],index);
                 index = (index+1) % BUFF_SIZE;
                 pthread_mutex_unlock(&mutex_buff);  // Cede control of critical region
 
@@ -87,14 +87,13 @@ void producer(void){
 
         }// end if if( producer_ptr[index] == (char *)0
         else{
-            printf("PRODUCER: not empty-  %c in BUFF[%d]\n",producer_ptr[index],index);
+            //printf("PRODUCER: not empty-  %c in BUFF[%d]\n",producer_ptr[index],index);
         }
 
     }// end while( !feof(fp) )
 
 
     // Cleanup
-    if( !fclose(fp) ){ printf("Failed to close the file.\n"); }
     pthread_exit((void*) 0);
 }// end producer
 
@@ -159,19 +158,23 @@ void task2(){
 
 
     printf("In task2: creating threads CONSUMER\n");
-    rc = pthread_create(&threads[1], &attr, producer, (void *)0);
+    rc = pthread_create(&threads[1], &attr, consumer, (void *)0);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);
     }// end if (rc)
     rc = 0;         // reset
 
+    // Destroy the attribute after use
+    pthread_attr_destroy(&attr);
 
+    // Join the threads before exit
     for(i=0; i<NUM_THREAD;i++)
         pthread_join(threads[i], &status);
 
     // Cleanup
     pthread_mutex_destroy(&mutex_buff);
+    if( !fclose(fp) ){ printf("Failed to close the file.\n"); }
 
 
 
