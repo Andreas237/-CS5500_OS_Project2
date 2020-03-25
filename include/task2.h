@@ -9,12 +9,10 @@
 
 
 // Global vars
-typedef int semaphore;
-semaphore BUFF_TRACKER = 0; // Number of items in the buffer
+pthread_mutex_t mutex_buff; // Create a mutex to lock the total
 char BUFF[BUFF_SIZE];       // six character buffer required by the project spec
 char fname[] = "project-2_code/message.txt";
 FILE *fp;           // pointer for file
-int CONTINUE = 1;
 
 
 
@@ -23,27 +21,33 @@ int CONTINUE = 1;
 // fn:      consumer
 // desc:    Read one character from BUFF.  Write it to the buffer, wraparound
 //          when the end of the buffer is reached
-void consumer(void){
-    char c;
+void *consumer(void){
     char * consumer_ptr = BUFF;
     int index = 0;
 
+    //  CONTINUE indicates that characters are still being read from *fp.
+    //  Read characters until producer() signals with CONTINUE that the file is
+    //  empty.
     do{
-        printf("CONSUMER: Removing %c in BUFF[%d]\n",consumer_ptr[index],index);
-        consumer_ptr[index] = (char *)0;    // clear current
-        index = (index+1) % BUFF_SIZE;      // next space
+        //  Print the next char, overwrite with null, increment index
         if( consumer_ptr[index] != (char *)0){
 
+            // Do the updates only if the lock is available
+            if( pthread_mutex_trylock(&mutex_buff) ){
 
+            printf("CONSUMER: Removing %c in BUFF[%d]\n",consumer_ptr[index],index);
+            consumer_ptr[index] = (char *)0;    // clear current buffer space
+            index = (index+1) % BUFF_SIZE;      // next buffer space
+            pthread_mutex_unlock(&mutex_buff);  // Cede control of critical reg.
+            }// end if( pthread_mutex_trylock(&mutex_buff) )
 
+        }// end if( consumer_ptr[index] != (char *)0)
 
-        }// end if
-    // }while(consumer_ptr[index] != (char *)0 );
-}while(CONTINUE);
+    }while( !feof(fp) );
 
 
     // Cleanup
-    // pthread_exit((void*) 0);
+    pthread_exit((void*) 0);
 }// end void consumer(void)
 
 
@@ -53,26 +57,34 @@ void consumer(void){
 // fn:      producer
 // desc:    Read one character from *fp.  Write it to the buffer, wraparound
 //          when the end of the buffer is reached
-void producer(void){
+void *producer(void){
     char c;
     char * producer_ptr = BUFF;
     int index = 0;
 
 
 
-    do{
-        c = getc(fp);
-        if( producer_ptr[index] == (char *)0 && producer_ptr[index] != EOF){
-            producer_ptr[index] = c;
-            printf("PRODUCER: Placing %c in BUFF[%d]\n",producer_ptr[index],index);
-            index = (index+1) % BUFF_SIZE;
-        }// end if
-    }while( !feof(fp));
+    //  Read the file while there are more characters
+    while( !feof(fp) ){
+
+        if( producer_ptr[index] == (char *)0 ){
+
+            if( pthread_mutex_trylock(&mutex_buff) ){
+                producer_ptr[index] = getc(fp);;
+                printf("PRODUCER: Placing %c in BUFF[%d]\n",producer_ptr[index],index);
+                index = (index+1) % BUFF_SIZE;
+                pthread_mutex_unlock(&mutex_buff);  // Cede control of critical region
+
+            }// end if( pthread_mutex_trylock(&mutex_buff) )
+
+        }// end if if( producer_ptr[index] == (char *)0 )
+
+    }// end while( !feof(fp) )
 
 
     // Cleanup
-    CONTINUE = 0;           // end the
-    //pthread_exit((void*) 0);
+    if( !fclose(fp) ){ printf("Failed to close the file.\n"); }
+    pthread_exit((void*) 0);
 }// end producer
 
 
@@ -87,6 +99,7 @@ int readft2(){
 		printf("ERROR: can't open %s! Exiting.\n",fname);
 		return 0;
 	}
+    return 1;
 }// end readft2
 
 
@@ -139,7 +152,7 @@ void task2(){
     */
 
     // Cleanup file stream
-    fclose(fp);
+
 
 
 }// end task2
@@ -148,4 +161,4 @@ void task2(){
 
 
 
-#endif TASK2
+#endif
