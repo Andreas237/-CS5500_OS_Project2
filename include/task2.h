@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define BUFF_SIZE 6
+#define NUM_THREAD 2
 
 
 // Global vars
@@ -21,9 +22,10 @@ FILE *fp;           // pointer for file
 // fn:      consumer
 // desc:    Read one character from BUFF.  Write it to the buffer, wraparound
 //          when the end of the buffer is reached
-void *consumer(void){
+void consumer(void){
     char * consumer_ptr = BUFF;
     int index = 0;
+    printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
 
     //  CONTINUE indicates that characters are still being read from *fp.
     //  Read characters until producer() signals with CONTINUE that the file is
@@ -42,6 +44,9 @@ void *consumer(void){
             }// end if( pthread_mutex_trylock(&mutex_buff) )
 
         }// end if( consumer_ptr[index] != (char *)0)
+        else {
+            printf("CONSUMER: not empty-  %c in BUFF[%d]\n",consumer_ptr[index],index);
+        }
 
     }while( !feof(fp) );
 
@@ -57,7 +62,7 @@ void *consumer(void){
 // fn:      producer
 // desc:    Read one character from *fp.  Write it to the buffer, wraparound
 //          when the end of the buffer is reached
-void *producer(void){
+void producer(void){
     char c;
     char * producer_ptr = BUFF;
     int index = 0;
@@ -77,7 +82,10 @@ void *producer(void){
 
             }// end if( pthread_mutex_trylock(&mutex_buff) )
 
-        }// end if if( producer_ptr[index] == (char *)0 )
+        }// end if if( producer_ptr[index] == (char *)0
+        else{
+            printf("PRODUCER: not empty-  %c in BUFF[%d]\n",producer_ptr[index],index);
+        }
 
     }// end while( !feof(fp) )
 
@@ -112,6 +120,14 @@ int readft2(){
 // desc:    Call functions to run task1
 void task2(){
 
+    pthread_t threads[NUM_THREAD];          // unique IDs for threads
+    int rc;                                 // return code for pthread_create
+    void *status;                           // status for terminated thread
+    pthread_attr_t attr;                    // pthread attribute
+    pthread_attr_init(&attr);               // initialize the attribute
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);    // make attr joinable
+
+
     // Setup the file pointer, open the file
     if(!readft2()){ exit(1);}
 
@@ -121,15 +137,17 @@ void task2(){
         BUFF[i] = (char *)0;
 
     // Setup threads
-    pthread_t threads[2];
-    int rc;
+
+
+
+    // Make them joinable
 
 
     //TODO: How to thread these?  attributes?
     //TODO: Lec7 discusses semaphores and mutexes; Lec8 pthread
-    /*
+
     printf("In task2: creating threads PRODCUER\n");
-    rc = pthread_create(&threads[t], NULL, producer, (void *));
+    rc = pthread_create(&threads[0], &attr, producer, (void *)0);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);
@@ -138,20 +156,19 @@ void task2(){
 
 
     printf("In task2: creating threads CONSUMER\n");
-    rc = pthread_create(&threads[t], NULL, producer, (void *));
+    rc = pthread_create(&threads[1], &attr, producer, (void *)0);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);
     }// end if (rc)
     rc = 0;         // reset
-    */
 
-    /*
-    producer();
-    consumer();
-    */
 
-    // Cleanup file stream
+    for(i=0; i<NUM_THREAD;i++)
+        pthread_join(threads[i], &status);
+
+    // Cleanup
+    pthread_mutex_destroy(&mutex_buff);
 
 
 
