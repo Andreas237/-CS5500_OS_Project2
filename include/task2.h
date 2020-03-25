@@ -21,7 +21,8 @@ FILE *fp;           // pointer for file
 
 // fn:      consumer
 // desc:    Read one character from BUFF.  Write it to the buffer, wraparound
-//          when the end of the buffer is reached
+//          when the end of the buffer is reached.  When a char is read write
+//          a null char to that spot, increment the consumer pointer.
 void consumer(void){
     char * consumer_ptr = BUFF;
     int index = 0;
@@ -61,7 +62,9 @@ void consumer(void){
 
 // fn:      producer
 // desc:    Read one character from *fp.  Write it to the buffer, wraparound
-//          when the end of the buffer is reached
+//          when the end of the buffer is reached.   If the producer pointer is
+//          pointing to a null char then read from *fp and write to producer
+//          pointer.
 void producer(void){
     char c;
     char * producer_ptr = BUFF;
