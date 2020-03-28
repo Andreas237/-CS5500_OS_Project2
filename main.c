@@ -1,6 +1,6 @@
 #include "task1.h"
 #include "task2.h"
-#include "task3.h"
+//#include "task3.h"
 
 
 void prettyPrintBegin(int);
@@ -30,7 +30,7 @@ int main(void){
 
 
    prettyPrintBegin(3);
-   task3();
+   // task3();
    prettyPrintEnd(3);
 
 
