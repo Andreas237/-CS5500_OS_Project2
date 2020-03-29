@@ -36,9 +36,11 @@ diagrams to show the performance trend.
 
 ## Implementation Details
 
-Tasks **1** and **2**  are each implemented in their own `.h` files.  `main.c` runs  both.
 
-Task **3** is implemented on its own because due to the requirements in **project2.pdf**.  See `task3/`
+### Tasks **1** and **2**  
+Are each implemented in their own `.h` files.  `main.c` runs  both.
+
+T
 
 
 To compile on a GNU/Linux machine type `make` in the root directors.
@@ -47,3 +49,7 @@ To compile on a GNU/Linux machine type `make` in the root directors.
 
 
 `make clean` removes `.o` files `*~` `core` and the executable, `exec_p2`
+
+
+### Task **3**
+Is implemented on its own because due to the requirements in **project2.pdf**.  See `task3/`, a `Makefile` is provided for simplicity.  In order to generate results for plotting a `bash` script it provided.  The data is written to `task3/data.txt` ([thanks!](https://www.cyberciti.biz/faq/bash-script-output/)).  Python's `matplotlib` will graph the results.
