@@ -271,7 +271,7 @@ void * producer_thread( void *arg)
 void * producer_thread_a( void * arg){
 
       int* thread_no = (int*)arg;
-      bind_thread_to_cpu(*(thread_no));//bind this thread to a CPU
+      //bind_thread_to_cpu(*(thread_no));//bind this thread to a CPU
 
       struct Node * ptr, tmp;
       struct list * local;
@@ -302,14 +302,15 @@ void * producer_thread_a( void * arg){
     // printf("Created %d nodes on local list for thread[%d]\n",counter,thread_no);
 
 
-    /* Attach the local list of nodes to the global list */
+
+    // Attach the local list of nodes to the global list
     while(1){
-        /* access the critical region and add a node to the global list */
+        // access the critical region and add a node to the global list
         if( !pthread_mutex_trylock(&mutex_lock) )
         {
 
           // Copied from producer_thread()
-          /* attache the generated node to the global list */
+          // attache the generated node to the global list
           if( List->header == NULL )
           {
               List->header = List->tail = local->header;
@@ -320,10 +321,7 @@ void * producer_thread_a( void * arg){
               List->tail = ptr;
           }
 
-          /*  Me adding my list in
-                List->tail->next = local->header;
-                List->tail = local->tail;
-          */
+
           pthread_mutex_unlock(&mutex_lock);
           // print debug like an expert
           //printf("Added  %d nodes on local list for thread[%d] to the global list\n",counter,thread_no);
@@ -333,7 +331,22 @@ void * producer_thread_a( void * arg){
 
     }//end while(1)
 
+/*
+  pthread_mutex_lock(&mutex_lock);
 
+            // Copied from producer_thread()
+            // attache the generated node to the global list
+            if( List->header == NULL )
+            {
+                List->header = List->tail = local->header;
+            }
+            else
+            {
+                List->tail->next = ptr;
+                List->tail = ptr;
+            }
+  pthread_mutex_unlock(&mutex_lock);
+  */
 
 }// end void * producer_thread_a( void *)
 
@@ -364,6 +377,7 @@ long run_assignment(int NUM_PROCS, int num_threads){
 
 
   NUM_PROCS = sysconf(_SC_NPROCESSORS_CONF);//get number of CPU
+
   if( NUM_PROCS > 0)
   {
       cpu_array = (int *)malloc(NUM_PROCS*sizeof(int));
