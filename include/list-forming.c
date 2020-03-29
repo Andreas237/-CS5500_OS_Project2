@@ -12,16 +12,23 @@
 #include <sys/param.h>
 #include <sched.h>
 
-#define K 200 // genreate a data node for K times in each thread
+// #define K 200 // genreate a data node for K times in each thread
 
 
 // Forward declarations
+//---------------------
 void bind_thread_to_cpu(int);
 struct Node* generate_data_node();
 void * producer_thread( void *);
 void * producer_thread_a(void *);
 int run_assignment(int,int);
 
+
+
+
+
+// Struct definitions
+//-------------------
 struct Node
 {
     int data;
@@ -33,10 +40,27 @@ struct list
      struct Node * header;
      struct Node * tail;
 };
+//---------------------
 
-pthread_mutex_t    mutex_lock;
 
-struct list *List;
+
+
+
+// Global Vars
+//-------------------
+pthread_mutex_t    mutex_lock;  // mutex lock variable
+struct list *List;              // global list of nodes
+int K = 200;                    // K value per assignment, default is 200
+
+
+
+
+
+
+
+
+
+
 
 
 int main(int argc, char* argv[])
@@ -52,6 +76,14 @@ int main(int argc, char* argv[])
     if(argc == 1){
         printf("ERROR: please provide an input arg (the number of threads)\n");
         exit(1);
+    }
+
+
+    if(argc < 3){
+        printf("No K value provided in argv[2], using default of %d\n",K);
+    }
+    else{
+      K = atoi(argv[2]);
     }
 
 
@@ -119,6 +151,8 @@ int main(int argc, char* argv[])
     }
     if( cpu_array!= NULL)
        free(cpu_array);
+
+
     /* calculate program runtime */
     //printf("Total run time is %ld microseconds.\n", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));
     printf("|Initial run time (microseconds): %ld|\t", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));

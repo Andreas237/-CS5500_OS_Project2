@@ -12,16 +12,23 @@
 #include <sys/param.h>
 #include <sched.h>
 
-#define K 200 // genreate a data node for K times in each thread
+// #define K 200 // genreate a data node for K times in each thread
 
 
 // Forward declarations
+//---------------------
 void bind_thread_to_cpu(int);
 struct Node* generate_data_node();
 void * producer_thread( void *);
 void * producer_thread_a(void *);
-int run_assignment(int,int);
+long run_assignment(int,int);
 
+
+
+
+
+// Struct definitions
+//-------------------
 struct Node
 {
     int data;
@@ -33,12 +40,33 @@ struct list
      struct Node * header;
      struct Node * tail;
 };
-
-pthread_mutex_t    mutex_lock;
-
-struct list *List;
+//---------------------
 
 
+
+
+
+// Global Vars
+//-------------------
+pthread_mutex_t    mutex_lock;  // mutex lock variable
+struct list *List;              // global list of nodes
+int K = 200;                    // K value per assignment, default is 200
+
+
+
+
+
+
+
+
+
+
+
+/**
+  argv[0]       list-forming
+  argv[1]       number of threads to create
+  argv[2]       number of data nodes each thread will create
+*/
 int main(int argc, char* argv[])
 {
     int i, num_threads;
@@ -52,6 +80,14 @@ int main(int argc, char* argv[])
     if(argc == 1){
         printf("ERROR: please provide an input arg (the number of threads)\n");
         exit(1);
+    }
+
+
+    if(argc < 3){
+        printf("No K value provided in argv[2], using default of %d\n",K);
+    }
+    else{
+      K = atoi(argv[2]);
     }
 
 
@@ -77,7 +113,7 @@ int main(int argc, char* argv[])
 
 
     // For report
-    printf("|Number or processors: %d|\t|Number of threads (inputted): %d|\t",NUM_PROCS,num_threads);
+    printf("%d;%d;%d;",NUM_PROCS,num_threads,K);
 
 
     pthread_mutex_init(&mutex_lock, NULL);
@@ -119,14 +155,22 @@ int main(int argc, char* argv[])
     }
     if( cpu_array!= NULL)
        free(cpu_array);
+
+
     /* calculate program runtime */
     //printf("Total run time is %ld microseconds.\n", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));
-    printf("|Initial run time (microseconds): %ld|\t", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));
+    long generic_runtime = (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec);
+    printf("%ld;",generic_runtime);
+
+    long mod_runtime = run_assignment(NUM_PROCS,num_threads);
+    printf("%ld;",mod_runtime);
 
 
+    float runtime_ratio = mod_runtime / generic_runtime;
+    mod_runtime < generic_runtime ? printf("mod faster\n") : printf("generic faster\n");
+    //printf("%s;\n",runtime_ratio);
 
-
-    return 0 * run_assignment(NUM_PROCS,num_threads);
+    return 0;
 }// end int main(int argc, char const *argv[]) {
 
 
@@ -303,9 +347,9 @@ void * producer_thread_a( void * arg){
 /**
   \fn run_assignment
   \var void* arg Thread number from main
-  \return int 0 if successful, 1 if not
+  \return long runtime
 */
-int run_assignment(int NUM_PROCS, int num_threads){
+long run_assignment(int NUM_PROCS, int num_threads){
 
   int i;
 
@@ -392,6 +436,7 @@ int run_assignment(int NUM_PROCS, int num_threads){
      free(cpu_array);
   /* calculate program runtime */
   // printf("Total run time for our implementation is %ld microseconds.\n", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));
-  printf("|Modified run time (microseconds): %ld|\t", (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec));
-  return 0;
+  long mod_runtime = (endtime.tv_sec-starttime.tv_sec) * 1000000+(endtime.tv_usec-starttime.tv_usec);
+  // printf("|Modified run time (microseconds): %ld|\t", mod_runtime);
+  return mod_runtime;
 }// end void run_assignment(int NUM_PROCS, int num_threads)
