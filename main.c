@@ -30,7 +30,8 @@ int main(void){
 
 
    prettyPrintBegin(3);
-   // task3();
+   printf("Task 3 is in ./task3/ and includes its own Makefile.\n");
+   printf("See:\n\ttask3/\n\t|------->  list-forming.c\n\t|------->  Makefile\n");
    prettyPrintEnd(3);
 
 
