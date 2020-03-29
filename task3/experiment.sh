@@ -10,10 +10,10 @@ make
 
 
 K_START=200
-K_END=1600
+K_END=6400
 
 NO_THRD_START=2
-NO_THRD_END=128
+NO_THRD_END=256
 
 
 
@@ -30,7 +30,7 @@ do
   # Loop for thread values
   for (( t=$NO_THRD_START; t<=$NO_THRD_END; t=2*t ))
   do
-    ./list-forming $k $t
+    ./my_list-forming $k $t
 
   done  # end for (( t=$NO_THRD_START; t<=$NO_THRD_END; t=2*t ))
 
