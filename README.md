@@ -17,6 +17,7 @@ same order. Assume a buffer (queue) size of 6 characters. Write a `Pthread` prog
 condition variables.
 
 ## Task 3
+Find the implementation of Task 3 in [task3/](https://github.com/Andreas237/CS5500_OS_Project2/blob/master/task3).
 Read attached code `list-forming.c` and modify the program to improve its performance.
 In this program there are `num_threads` threads. Each thread creates a data node and
 attaches it to a global list. This operation is repeated `K` times by each thread. The performance of this program is measured by the program runtime (in microsecond). Apparently,
